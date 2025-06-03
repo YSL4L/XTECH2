@@ -1,42 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link rel="stylesheet" href="css/tei.css" />
-    <script src="../js/CETEI.js"></script>
+    <title>Jean Paul – TEI Anzeige</title>
+
+    <link rel="stylesheet" href="styles/style.css" />
+
+    <script src="app/app.js"></script>
+
     <script>
-      let c = new CETEI();
-      let behaviors = {
-        tei: {
-          head: function (e) {
-            let level = document.evaluate(
-              "count(ancestor::tei-div)",
-              e,
-              null,
-              XPathResult.NUMBER_TYPE,
-              null
-            );
-            let result = document.createElement(
-              "h" + (level.numberValue > 7 ? 7 : level.numberValue)
-            );
-            for (let n of Array.from(e.childNodes)) {
-              result.appendChild(n.cloneNode());
-            }
-            return result;
+      document.addEventListener("DOMContentLoaded", function () {
+        const CETEIcean = new CETEI();
+
+        const behaviors = {
+          tei: {
+            head: function (e) {
+              const level = document.evaluate(
+                "count(ancestor::tei-div)",
+                e,
+                null,
+                XPathResult.NUMBER_TYPE,
+                null
+              );
+              const heading = document.createElement(
+                "h" + Math.min(level.numberValue || 1, 6)
+              );
+              for (const child of e.childNodes) {
+                heading.appendChild(child.cloneNode(true));
+              }
+              return heading;
+            },
+            lb: ["<br>"],
+            pb: ['<p class="break">$@n</p>'],
           },
-          lb: ["<br>"],
-          /* Insert a <p> with the content of the <pb>'s @n attribute inside it
-           Add a line above with CSS */
-          pb: ['<p class="break">$@n</p>'],
-        },
-      };
-      c.addBehaviors(behaviors);
-      c.getHTML5("../fpn-washington.xml", function (data) {
-        document.getElementsByTagName("body")[0].appendChild(data);
+        };
+
+        CETEIcean.addBehaviors(behaviors);
+
+        CETEIcean.getHTML5("files/jean-paul-tei.xml", function (data) {
+          document.body.appendChild(data);
+          CETEIcean.addStyle(document, data);
+        });
       });
     </script>
   </head>
-  <body></body>
+  <body>
+    <h1>Jean Paul – TEI-Dokumentanzeige</h1>
+  </body>
 </html>
